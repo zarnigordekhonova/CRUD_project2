@@ -1,5 +1,6 @@
-from django.shortcuts import render
-from .models import Products, Category
+from django.shortcuts import render, redirect, get_object_or_404
+from .forms import ProductsForm
+from .models import Products,Category
 
 # Create your views here.
 
@@ -26,3 +27,38 @@ def detail(request, pk):
         'product': product
     }
     return render(request, 'detail.html', context=context)
+
+
+def add_products(request):
+    form = ProductsForm(request.POST, request.FILES)
+    if form.is_valid():
+        form.save()
+        return redirect('Products:get_info')
+    context = {
+        'form': form
+        }
+    return render(request, 'create.html', context=context)
+
+
+
+def update_products(request, pk):
+    data = Products.objects.get(pk=pk)
+    form = ProductsForm(request.POST, request.FILES, instance=data)
+    if form.is_valid():
+        print(1)
+        form.save()
+        return redirect('Products:get_info')
+    context = {
+        'form': form
+        }
+    return render(request, 'update.html', context=context)
+
+
+
+def delete_products(request, pk):
+    book = get_object_or_404(Products, pk=pk)
+    if request.method == 'POST':
+        book.delete()
+        return redirect('Products:get_info')
+
+    return render(request, 'delete.html', {'book': book})
